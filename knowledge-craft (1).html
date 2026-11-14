@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Craft</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1a1a;--stone:#7b7b7b;--hi:#c9c9c9;--lo:#3a3a3a;--grass:#5fa832;--dirt:#7a5230;--gold:#ffd23f}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#2b1d10;background-image:linear-gradient(45deg,#33230f 25%,transparent 25%,transparent 75%,#33230f 75%),linear-gradient(45deg,#33230f 25%,transparent 25%,transparent 75%,#33230f 75%);background-size:32px 32px;background-position:0 0,16px 16px;font-family:'Press Start 2P','Courier New',monospace;color:#fff;display:flex;justify-content:center;padding:12px}
+#wrap{width:100%;max-width:980px}
+h1{font-size:clamp(14px,3vw,24px);margin:6px 0 12px;color:var(--gold);text-shadow:3px 3px 0 #000;text-align:center;letter-spacing:1px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:#3a3a3a;border:4px solid #000;box-shadow:inset 3px 3px 0 #6a6a6a,inset -3px -3px 0 #222;padding:8px 10px;margin-bottom:8px;font-size:10px}
+.bar span{white-space:nowrap}
+#hearts{color:#e62e2e;letter-spacing:2px;text-shadow:2px 2px 0 #000;font-size:13px}
+#hearts i{color:#444;font-style:normal}
+.btn{font-family:inherit;font-size:10px;color:#fff;background:var(--stone);border:3px solid #000;box-shadow:inset 3px 3px 0 var(--hi),inset -3px -3px 0 var(--lo);padding:10px 12px;cursor:pointer;text-shadow:2px 2px 0 #333;line-height:1.4}
+.btn:hover:not(:disabled){background:#6f7fc4;box-shadow:inset 3px 3px 0 #b6c1ff,inset -3px -3px 0 #3a4684}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.surp{background:#5aa02c;box-shadow:inset 3px 3px 0 #a5e06f,inset -3px -3px 0 #2c5a14}
+.btn.surp:hover{background:#6fc03a;box-shadow:inset 3px 3px 0 #c5f593,inset -3px -3px 0 #2c5a14}
+#stage{position:relative;border:4px solid #000;box-shadow:0 0 0 4px #555;background:#000;overflow:hidden}
+#c{display:block;width:100%;aspect-ratio:16/9;image-rendering:pixelated}
+.bub{position:absolute;bottom:45%;max-width:40%;background:#fff;color:#111;border:3px solid #000;box-shadow:inset -3px -3px 0 #bbb;padding:8px 9px;font-size:clamp(6px,1.35vw,10px);line-height:1.6;opacity:0;transform:translateY(6px);transition:.2s;pointer-events:none}
+.bub.on{opacity:1;transform:none}
+.bub b{display:block;color:#2a6;margin-bottom:3px}
+.bub::after{content:"";position:absolute;top:100%;width:10px;height:10px;background:#fff;border:3px solid #000;border-top:0;border-left:0;transform:rotate(45deg) translate(-6px,-6px)}
+#bS{left:33%;transform:translate(-82%,6px)}#bS.on{transform:translate(-82%,0)}#bS::after{left:80%}
+#bA{left:47%;transform:translate(-14%,6px)}#bA.on{transform:translate(-14%,0)}#bA::after{left:14%}
+#toast{position:absolute;top:10px;left:50%;transform:translate(-50%,-80px);background:#000b;border:3px solid var(--gold);padding:10px 14px;font-size:clamp(7px,1.6vw,11px);color:var(--gold);transition:.35s;white-space:nowrap}
+#toast.on{transform:translate(-50%,0)}
+#ov{position:absolute;inset:0;background:#000c;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:16px}
+#ov[hidden]{display:none}
+#ov h2{margin:0;font-size:clamp(16px,4vw,32px);color:var(--gold);text-shadow:4px 4px 0 #000}
+#ov p{margin:0;font-size:clamp(7px,1.5vw,11px);line-height:2;max-width:520px}
+#panel{margin-top:8px;min-height:190px;background:#3a3a3a;border:4px solid #000;box-shadow:inset 3px 3px 0 #6a6a6a,inset -3px -3px 0 #222;padding:14px}
+#panel .nm{font-size:9px;color:var(--gold);margin-bottom:10px}
+#panel .q{font-size:clamp(10px,1.9vw,14px);line-height:1.7;margin-bottom:14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts .btn{text-align:left;min-height:46px}
+.opts .btn.ok{background:#3f9d2e;box-shadow:inset 3px 3px 0 #8fe27f,inset -3px -3px 0 #1d5a14}
+.opts .btn.no{background:#b33;box-shadow:inset 3px 3px 0 #ff8a8a,inset -3px -3px 0 #661a1a}
+.fact{margin-top:12px;font-size:9px;line-height:1.8;color:#d6f5c8;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.hint{font-size:9px;line-height:1.9;color:#ccc}
+@media(max-width:560px){.opts{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.bub,#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>KNOWLEDGE CRAFT</h1>
+  <div class="bar">
+    <span id="hearts"></span>
+    <span id="score">XP 0</span>
+    <span id="np">♪ —</span>
+    <span>
+      <button class="btn surp" id="surp">🎲 SURPRISE ME</button>
+      <button class="btn" id="mute" aria-label="Mute music">🔊</button>
+    </span>
+  </div>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div class="bub" id="bS"></div><div class="bub" id="bA"></div>
+    <div id="toast"></div>
+    <div id="ov">
+      <h2>KNOWLEDGE CRAFT</h2>
+      <p>Steve and Alex are going for a walk. Answer their quiz questions to earn XP. Each wrong answer costs a heart. Music and weather change together, so press Surprise Me anytime.</p>
+      <button class="btn" id="start">▶ START WALKING</button>
+    </div>
+  </div>
+  <div id="panel"><div class="hint">Press Start Walking to begin. Sound on for the full experience.</div></div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.getElementById(s);
+const cv=$('c'),g=cv.getContext('2d'),W=320,H=180,GY=138;
+cv.width=W;cv.height=H;
+const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const hash=n=>{n=Math.sin(n*127.1+311.7)*43758.5453;return n-Math.floor(n)};
+const mix=(a,b,t)=>`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')})`;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------- Questions: [question, [options], correctIndex, fun fact] ---------- */
+const Q=[
+["Which planet is known as the Red Planet?",["Mars","Venus","Jupiter","Mercury"],0,"Iron oxide dust makes Mars look red."],
+["How many continents are there on Earth?",["5","6","7","8"],2,"Asia is the biggest continent."],
+["Which is the largest ocean?",["Atlantic","Pacific","Indian","Arctic"],1,"The Pacific covers about a third of Earth."],
+["What is the chemical formula for water?",["CO2","O2","NaCl","H2O"],3,"Two hydrogen atoms plus one oxygen."],
+["What is the capital of Japan?",["Kyoto","Osaka","Tokyo","Nagoya"],2,"Tokyo is one of the biggest cities on Earth."],
+["Which is the fastest land animal?",["Lion","Cheetah","Horse","Greyhound"],1,"Cheetahs hit about 100 km/h in short sprints."],
+["How many legs does a spider have?",["6","8","10","12"],1,"Spiders are arachnids, not insects."],
+["Who painted the Mona Lisa?",["Van Gogh","Picasso","Leonardo da Vinci","Monet"],2,"It hangs in the Louvre in Paris."],
+["Which gas do plants absorb from the air?",["Oxygen","Nitrogen","Helium","Carbon dioxide"],3,"Plants use it for photosynthesis."],
+["What is the hardest natural substance?",["Gold","Iron","Diamond","Quartz"],2,"Diamonds are made of carbon atoms."],
+["What is the smallest prime number?",["0","1","2","3"],2,"2 is also the only even prime."],
+["What is the capital of Greece?",["Athens","Sparta","Thessaloniki","Corinth"],0,"Athens is over 3,000 years old."],
+["At sea level, water boils at what temperature?",["90°C","100°C","110°C","120°C"],1,"It boils at lower temperatures on mountains."],
+["Which planet is closest to the Sun?",["Venus","Earth","Mercury","Mars"],2,"Mercury also has the shortest year."],
+["How many bones does an adult human have?",["106","206","306","406"],1,"Babies are born with around 300."],
+["Who wrote Romeo and Juliet?",["Dickens","Shakespeare","Tolkien","Homer"],1,"He wrote it around 1595."],
+["What is the largest animal on Earth?",["Elephant","Giraffe","Blue whale","Great white shark"],2,"A blue whale's heart is as big as a small car."],
+["Which element has the symbol Au?",["Silver","Gold","Copper","Aluminium"],1,"Au comes from the Latin word aurum."],
+["Which of these birds cannot fly?",["Eagle","Owl","Parrot","Penguin"],3,"Penguins are brilliant swimmers instead."],
+["In which country are the Great Pyramids of Giza?",["Egypt","Peru","Mexico","Iraq"],0,"They're about 4,500 years old."],
+["Which Minecraft mob explodes near players?",["Zombie","Creeper","Skeleton","Enderman"],1,"Creepers were born from a coding bug."],
+["Roughly how fast does light travel?",["300 km/s","3,000 km/s","300,000 km/s","3 million km/s"],2,"Sunlight takes about 8 minutes to reach us."],
+["Which animal is a mammal?",["Shark","Dolphin","Penguin","Crocodile"],1,"Dolphins breathe air and nurse their babies."],
+["How many sides does a hexagon have?",["5","6","7","8"],1,"Honeycomb cells are hexagons."],
+/* space */
+["Which is the largest planet in our solar system?",["Saturn","Neptune","Jupiter","Earth"],2,"Jupiter could fit over 1,300 Earths inside."],
+["Which planet is famous for its bright rings?",["Saturn","Mars","Venus","Mercury"],0,"Saturn's rings are mostly ice and rock."],
+["What is the closest star to Earth?",["Sirius","The Sun","Polaris","Proxima"],1,"The Sun is a star, about 150 million km away."],
+["In which galaxy do we live?",["Andromeda","Milky Way","Triangulum","Whirlpool"],1,"The Milky Way holds hundreds of billions of stars."],
+["Who was the first person to walk on the Moon?",["Buzz Aldrin","Yuri Gagarin","Neil Armstrong","John Glenn"],2,"That happened in July 1969."],
+/* body & biology */
+["Which part of a cell is its 'powerhouse'?",["Nucleus","Mitochondria","Membrane","Ribosome"],1,"Mitochondria produce most of a cell's energy."],
+["Which organ pumps blood around the body?",["Lungs","Liver","Heart","Kidney"],2,"The heart beats about 100,000 times a day."],
+["What is the largest organ of the human body?",["Skin","Liver","Brain","Stomach"],0,"Skin covers about 2 square metres."],
+["Which vitamin do we get from sunlight?",["A","C","D","K"],2,"Vitamin D helps keep bones strong."],
+["Animals that eat only plants are called...",["Carnivores","Herbivores","Omnivores","Insectivores"],1,"Cows and rabbits are herbivores."],
+["What force keeps us on the ground?",["Magnetism","Friction","Gravity","Wind"],2,"Gravity also keeps the Moon orbiting Earth."],
+/* animals */
+["How many hearts does an octopus have?",["1","2","3","4"],2,"Two pump blood to the gills, one to the body."],
+["Which is the tallest animal in the world?",["Elephant","Giraffe","Camel","Ostrich"],1,"A giraffe can be 5 metres tall."],
+["What is a baby kangaroo called?",["Cub","Pup","Joey","Kit"],2,"Joeys live in their mother's pouch."],
+["What is a group of lions called?",["Pack","Herd","Pride","Flock"],2,"Prides are mostly related females and cubs."],
+["Which of these is a reptile?",["Frog","Snake","Salamander","Newt"],1,"Reptiles have dry scaly skin."],
+["Which is the only mammal that can truly fly?",["Flying squirrel","Bat","Sugar glider","Owl"],1,"Bats are the only mammals with real wings."],
+["A caterpillar grows up to become a...",["Beetle","Dragonfly","Butterfly","Ant"],2,"It rests inside a chrysalis first."],
+["Which bird is the fastest diver?",["Peregrine falcon","Eagle","Pelican","Hummingbird"],0,"It can dive faster than 300 km/h."],
+["Bees collect nectar to make what?",["Silk","Honey","Wax only","Sugar cane"],1,"A bee makes only a tiny spoon of honey in life."],
+/* capitals & geography */
+["What is the capital of France?",["Lyon","Marseille","Paris","Nice"],2,"The Eiffel Tower is in Paris."],
+["What is the capital of Italy?",["Milan","Rome","Venice","Naples"],1,"Rome is nicknamed the Eternal City."],
+["What is the capital of Spain?",["Barcelona","Seville","Madrid","Valencia"],2,"Madrid is one of Europe's highest capitals."],
+["What is the capital of Egypt?",["Alexandria","Cairo","Luxor","Giza"],1,"Cairo sits beside the River Nile."],
+["What is the capital of Australia?",["Sydney","Melbourne","Canberra","Perth"],2,"Many people guess Sydney, but it's Canberra."],
+["What is the capital of Canada?",["Toronto","Ottawa","Vancouver","Montreal"],1,"Ottawa is in the province of Ontario."],
+["What is the capital of Brazil?",["Rio de Janeiro","São Paulo","Brasília","Salvador"],2,"Brasília was built from scratch in the 1950s."],
+["What is the capital of Turkey?",["Istanbul","Ankara","Izmir","Antalya"],1,"Istanbul is bigger, but Ankara is the capital."],
+["Which is the largest country by area?",["Canada","China","USA","Russia"],3,"Russia spans 11 time zones."],
+["Which is the tallest mountain above sea level?",["K2","Everest","Mont Blanc","Kilimanjaro"],1,"Everest is about 8,849 metres high."],
+["Which is the largest hot desert?",["Gobi","Sahara","Kalahari","Arabian"],1,"The Sahara is about the size of the USA."],
+["Which country is shaped like a boot?",["Greece","Spain","Italy","Portugal"],2,"Sicily looks like a ball being kicked."],
+["In which country is Mount Olympus?",["Italy","Greece","Turkey","Egypt"],1,"Ancient Greeks said the gods lived there."],
+["Which sea lies between Greece and Turkey?",["Aegean","Baltic","Red Sea","Black Sea"],0,"The Aegean has thousands of islands."],
+["Which river carries the most water in the world?",["Nile","Amazon","Danube","Mississippi"],1,"The Amazon holds about a fifth of river water."],
+["Which is the world's largest island?",["Madagascar","Borneo","Greenland","Iceland"],2,"Greenland is mostly covered in ice."],
+/* maths */
+["How many days are in a leap year?",["364","365","366","367"],2,"February gets an extra day, the 29th."],
+["What is the square root of 144?",["10","11","12","14"],2,"12 x 12 = 144."],
+["What is 7 x 8?",["54","56","58","64"],1,"A handy trick: 5, 6, 7, 8 → 56 = 7 x 8."],
+["The angles inside a triangle add up to...",["90°","180°","270°","360°"],1,"This works for every flat triangle."],
+["What is pi (π) roughly equal to?",["2.14","3.14","4.13","3.41"],1,"Pi never ends and never repeats."],
+["How many minutes are in one day?",["1,000","1,240","1,440","1,640"],2,"24 hours x 60 minutes = 1,440."],
+["What is the Roman numeral for 50?",["V","X","L","C"],2,"L = 50, C = 100, D = 500, M = 1,000."],
+["How many sides does an octagon have?",["6","7","8","10"],2,"A stop sign is an octagon."],
+["What is the binary number 101 in decimal?",["3","4","5","6"],2,"1x4 + 0x2 + 1x1 = 5."],
+/* history & people */
+["Who is said to have discovered gravity after seeing an apple fall?",["Galileo","Isaac Newton","Einstein","Darwin"],1,"Newton published his laws of motion in 1687."],
+["Who developed the theory of relativity?",["Albert Einstein","Nikola Tesla","Marie Curie","Stephen Hawking"],0,"E = mc² comes from his work."],
+["Who is credited with inventing the telephone?",["Edison","Alexander Graham Bell","Tesla","Marconi"],1,"The first call was made in 1876."],
+["Where were the first ancient Olympic Games held?",["Rome","Athens","Olympia, Greece","Sparta"],2,"They began around 776 BC."],
+["Which philosopher taught Alexander the Great?",["Socrates","Plato","Aristotle","Pythagoras"],2,"Aristotle also studied biology and logic."],
+["The Parthenon in Athens honours which goddess?",["Hera","Athena","Aphrodite","Artemis"],1,"Athens was named after Athena."],
+["The Statue of Liberty was a gift from which country?",["England","Spain","France","Italy"],2,"It arrived in New York in 1885."],
+["In which year did World War II end?",["1918","1939","1945","1950"],2,"It ended in 1945."],
+["In which year did the Berlin Wall fall?",["1979","1989","1999","1969"],1,"Germany reunified in 1990."],
+["Which empire built the Colosseum?",["Greek","Roman","Persian","Ottoman"],1,"It could hold about 50,000 spectators."],
+["Which civilization built Machu Picchu?",["Aztec","Maya","Inca","Olmec"],2,"It sits high in the Andes mountains of Peru."],
+["Which famous ship sank in 1912 after hitting an iceberg?",["Titanic","Mayflower","Endeavour","Bismarck"],0,"It sank on its very first voyage."],
+/* arts & language */
+["Who painted 'The Starry Night'?",["Monet","Vincent van Gogh","Dalí","Rembrandt"],1,"He painted it in 1889."],
+["Who composed the famous Fifth Symphony ('da-da-da-DUM')?",["Mozart","Bach","Beethoven","Chopin"],2,"Beethoven kept composing even after going deaf."],
+["Who wrote the Harry Potter books?",["J.R.R. Tolkien","J.K. Rowling","Roald Dahl","C.S. Lewis"],1,"The first book came out in 1997."],
+["Which ancient poet is credited with writing the Odyssey?",["Homer","Virgil","Sophocles","Hesiod"],0,"It follows Odysseus's long trip home."],
+/* science & chemistry */
+["What is the chemical symbol for iron?",["Ir","Fe","In","I"],1,"Fe comes from the Latin word ferrum."],
+["Which gas makes up most of Earth's air?",["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],1,"Air is about 78% nitrogen."],
+["Which is the lightest element?",["Helium","Hydrogen","Lithium","Oxygen"],1,"Hydrogen powers the Sun."],
+["Water freezes at what temperature in °C?",["-10","0","4","10"],1,"Water freezes at 32°F, which is 0°C."],
+["Which metal is liquid at room temperature?",["Lead","Mercury","Tin","Zinc"],1,"Mercury was once used in thermometers."],
+/* sports & food */
+["How many players are on the pitch for one soccer team?",["9","10","11","12"],2,"That includes the goalkeeper."],
+["Which sport is played at Wimbledon?",["Golf","Tennis","Cricket","Rugby"],1,"Players there wear mostly white."],
+["How many rings are on the Olympic flag?",["4","5","6","7"],1,"They stand for the five inhabited continents."],
+["Which country is pizza originally from?",["France","Greece","Italy","USA"],2,"Modern pizza began in Naples."],
+["Which fruit is the main ingredient in guacamole?",["Lime","Avocado","Tomato","Mango"],1,"Avocados are technically a berry."],
+["Which country is famous for feta cheese?",["Greece","Spain","Switzerland","Norway"],0,"Feta is made from sheep's and goat's milk."],
+/* tech */
+["What does CPU stand for?",["Central Processing Unit","Computer Power Unit","Core Program Utility","Central Process Update"],0,"It's the 'brain' of a computer."],
+["What does HTML stand for?",["HyperText Markup Language","High Tech Modern Language","Home Tool Markup Link","Hyper Transfer Mode Logic"],0,"Every web page is built with HTML."],
+/* minecraft */
+["What do you need to craft a torch?",["Stick and coal","Iron and wood","Stone and flint","Gold and stick"],0,"Charcoal works instead of coal too."],
+["Which block is used to build a Nether portal?",["Bedrock","Obsidian","Glass","Netherrack"],1,"Obsidian forms when water meets lava."],
+["Which dragon lives in The End?",["Wither","Ender Dragon","Warden","Ghast"],1,"Defeating it makes an exit portal."],
+["Which mob drops gunpowder when defeated?",["Cow","Zombie","Creeper","Pig"],2,"Gunpowder is used to make TNT."],
+["Who created Minecraft?",["Markus 'Notch' Persson","Gabe Newell","Hideo Kojima","Shigeru Miyamoto"],0,"It was first released in 2009."],
+["What can cure a zombie villager?",["Golden apple and weakness potion","Diamond","Milk bucket","Bread"],0,"Then the villager gets big trade discounts."]
+];
+
+/* ---------- Weather ---------- */
+const WX={
+sunny:{top:[88,170,255],bot:[190,230,255],dark:0,rain:0,snow:0,storm:0,cloud:.45,stars:0},
+rain:{top:[96,112,134],bot:[150,166,182],dark:.22,rain:1,snow:0,storm:0,cloud:1,stars:0},
+snow:{top:[158,180,206],bot:[226,236,246],dark:.08,rain:0,snow:1,storm:0,cloud:.8,stars:0},
+night:{top:[8,12,40],bot:[34,44,96],dark:.45,rain:0,snow:0,storm:0,cloud:.2,stars:1},
+storm:{top:[40,48,64],bot:[84,94,110],dark:.4,rain:1.6,snow:0,storm:1,cloud:1,stars:0}
+};
+const cs=JSON.parse(JSON.stringify(WX.sunny));let wk='sunny';
+function updWx(dt){const t=WX[wk],k=Math.min(1,dt*.9);for(const p in cs){if(Array.isArray(cs[p]))cs[p]=cs[p].map((v,i)=>v+(t[p][i]-v)*k);else cs[p]+=(t[p]-cs[p])*k}}
+
+/* ---------- Music (generated live with Web Audio) ---------- */
+const TR=[
+{n:'Sunny Meadow',w:'sunny',ic:'☀️',bpm:92,root:261.63,sc:[0,2,4,7,9,12,14,16,19,21],ch:[[0,0],[9,1],[5,0],[7,0]],lead:'triangle',pad:'sine',p:.55,oct:2},
+{n:'Soft Rain',w:'rain',ic:'🌧️',bpm:66,root:146.83,sc:[0,3,5,7,10,12,15,17,19,22],ch:[[0,1],[8,0],[3,0],[10,0]],lead:'sine',pad:'triangle',p:.5,oct:2},
+{n:'Snowfall',w:'snow',ic:'❄️',bpm:60,root:261.63,sc:[0,2,4,6,7,9,11,12,14,16,18,19],ch:[[0,0],[2,0],[9,1],[7,0]],lead:'sine',pad:'sine',p:.42,oct:4},
+{n:'Starry Night',w:'night',ic:'🌙',bpm:74,root:164.81,sc:[0,3,5,7,10,12,15,17,19,22],ch:[[0,1],[8,0],[3,0],[10,0]],lead:'triangle',pad:'sine',p:.5,oct:2},
+{n:'Thunder Ridge',w:'storm',ic:'⛈️',bpm:104,root:130.81,sc:[0,3,5,7,8,10,12,15,17,19],ch:[[0,1],[8,0],[10,0],[7,0]],lead:'square',pad:'sawtooth',p:.5,oct:2,bass:'sawtooth',drums:1}
+];
+let AC,master,bus,noiseGain,noiseBuf,nextT=0,step=0,mi=3,curT=0,muted=false;
+function initAudio(){
+ if(AC){AC.resume();return}
+ AC=new(window.AudioContext||window.webkitAudioContext)();
+ master=AC.createGain();master.gain.value=.7;master.connect(AC.destination);
+ bus=AC.createGain();bus.connect(master);
+ const d=AC.createDelay();d.delayTime.value=.34;const fb=AC.createGain();fb.gain.value=.35;
+ const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
+ bus.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(master);
+ const len=AC.sampleRate*2;noiseBuf=AC.createBuffer(1,len,AC.sampleRate);
+ const dd=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)dd[i]=Math.random()*2-1;
+ const src=AC.createBufferSource();src.buffer=noiseBuf;src.loop=true;
+ const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1800;bp.Q.value=.4;
+ noiseGain=AC.createGain();noiseGain.gain.value=0;
+ src.connect(bp);bp.connect(noiseGain);noiseGain.connect(master);src.start();
+ nextT=AC.currentTime+.1;step=0;setInterval(sched,100);
+}
+function tone(f,t,d,type,v,att=.02){
+ const o=AC.createOscillator(),gn=AC.createGain();o.type=type;o.frequency.value=f;
+ gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(v,t+att);
+ gn.gain.exponentialRampToValueAtTime(.0001,t+Math.max(d,att+.05));
+ o.connect(gn);gn.connect(bus);o.start(t);o.stop(t+d+.1);
+}
+function kick(t){const o=AC.createOscillator(),gn=AC.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);
+ gn.gain.setValueAtTime(.35,t);gn.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(gn);gn.connect(master);o.start(t);o.stop(t+.25)}
+function hat(t){const s=AC.createBufferSource();s.buffer=noiseBuf;const f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=7000;
+ const gn=AC.createGain();gn.gain.setValueAtTime(.06,t);gn.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f);f.connect(gn);gn.connect(master);s.start(t,Math.random(),.08)}
+function thunder(){if(!AC||muted)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=noiseBuf;
+ const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=260;const gn=AC.createGain();
+ gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(.8,t+.1);gn.gain.exponentialRampToValueAtTime(.001,t+2.4);
+ s.connect(f);f.connect(gn);gn.connect(master);s.start(t,Math.random());s.stop(t+2.6)}
+function sched(){
+ if(!AC)return;const T=TR[curT],sd=60/T.bpm/2;
+ while(nextT<AC.currentTime+.3){
+  const s=step,t=nextT,b=s%8,[cr,mn]=T.ch[Math.floor(s/8)%4],r=T.root*Math.pow(2,cr/12);
+  if(b===0){[0,mn?3:4,7].forEach(x=>tone(r*2*Math.pow(2,x/12),t,sd*8,T.pad,.03,.5));tone(r,t,sd*3.5,T.bass||'triangle',.12)}
+  if(b===4)tone(r*1.5,t,sd*3,T.bass||'triangle',.08);
+  if(Math.random()<T.p){mi=clamp(mi+Math.floor(rnd(-2,3)),0,T.sc.length-1);
+   tone(T.root*T.oct*Math.pow(2,T.sc[mi]/12),t,sd*(1+Math.random()*2.5),T.lead,.055)}
+  if(T.drums){if(b%4===0)kick(t);if(b%2===1)hat(t)}
+  nextT+=sd;step++;
+ }
+}
+function chime(){if(!AC)return;const t=AC.currentTime;[0,4,7,12].forEach((x,i)=>tone(523.25*Math.pow(2,x/12),t+i*.07,.3,'triangle',.08))}
+
+/* ---------- Scene ---------- */
+const clouds=Array.from({length:8},(_,i)=>({x:i*60+rnd(0,30),y:8+hash(i)*44,w:28+hash(i+9)*34}));
+const rain=Array.from({length:140},()=>({x:rnd(0,W+40),y:rnd(0,H),s:Math.random()}));
+const snow=Array.from({length:120},()=>({x:rnd(0,W),y:rnd(0,H),s:Math.random()}));
+const flies=Array.from({length:14},(_,i)=>({x:hash(i)*W,y:GY-10-hash(i+3)*50,p:hash(i+5)*6}));
+let scroll=0,time=0,flash=0,ltimer=3,boltX=100;
+const rect=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h)};
+const snowBlend=(c,k=.85)=>mix(c,[236,246,252],cs.snow*k);
+
+function drawSky(){
+ for(let y=0;y<GY+6;y+=6){rect(0,y,W,6,mix(cs.top,cs.bot,y/GY))}
+ if(cs.stars>.04){g.globalAlpha=cs.stars;for(let i=0;i<60;i++){const tw=.5+.5*Math.sin(time*2+i);g.globalAlpha=cs.stars*(.35+.65*tw);rect(hash(i)*W,hash(i+50)*(GY-30),i%7===0?2:1,i%7===0?2:1,'#fff')}g.globalAlpha=1}
+ const sa=(1-cs.stars)*(1-Math.min(1,cs.rain))*(1-cs.snow*.6);
+ if(sa>.03){g.globalAlpha=sa;rect(244,20,20,20,'#fff4a8');rect(247,23,14,14,'#ffd93a');g.globalAlpha=1}
+ if(cs.stars>.05){g.globalAlpha=cs.stars;rect(244,18,16,16,'#e8ecf5');rect(248,22,4,4,'#b9c0d4');rect(254,28,3,3,'#b9c0d4');g.globalAlpha=1}
+ clouds.forEach((c,i)=>{const a=clamp((cs.cloud-i/8)*8,0,1);if(a<=0)return;
+  const x=(((c.x-scroll*.1-time*3)%(W+80))+(W+80))%(W+80)-40,v=Math.round(255-Math.min(1,cs.rain)*115-cs.stars*150);
+  g.globalAlpha=a*.95;const col=`rgb(${v},${v},${Math.min(255,v+8)})`;
+  rect(x,c.y,c.w,8,col);rect(x+6,c.y-6,c.w*.6,6,col);rect(x+c.w*.5,c.y+8,c.w*.4,4,col);g.globalAlpha=1})
+}
+function drawHills(){
+ const col=snowBlend([74,134,56],.8);
+ for(let x=-8;x<W+8;x+=8){const wx=x+scroll*.2,i=Math.floor(wx/8),h=20+Math.floor(((Math.sin(wx*.021)*.5+.5)*34+hash(i)*10)/8)*8;
+  rect(x-(scroll*.2%8),GY-h,8,h,col);rect(x-(scroll*.2%8),GY-h,8,2,snowBlend([96,160,70],.9))}
+}
+function leaves(x,y,w,h){const a=snowBlend([46,125,50],.9),b=snowBlend([62,150,62],.9);rect(x,y,w,h,a);rect(x+2,y+2,w-4,h-4,b);rect(x+w*.3,y+h*.4,4,4,a)}
+function drawTrees(par,spacing,k){
+ const s=scroll*par,i0=Math.floor(s/spacing)-1;
+ for(let i=i0;i<i0+Math.ceil(W/spacing)+3;i++){
+  if(hash(i*(k+1))<.25)continue;
+  const sx=Math.round(i*spacing+hash(i+k)*spacing*.6-s),big=k===1,tw=big?6:4,th=big?30:16;
+  rect(sx,GY-th,tw,th,'#6b4a2a');rect(sx+1,GY-th,1,th,'#82603a');
+  const lw=big?34:20,lh=big?20:11;leaves(sx+tw/2-lw/2,GY-th-lh+4,lw,lh);
+  leaves(sx+tw/2-lw*.3,GY-th-lh-6,lw*.6,lh*.6)
+ }
+}
+function drawGround(){
+ const grass=snowBlend([96,168,52],.9),grass2=snowBlend([118,190,66],.9);
+ const off=scroll%8,b0=Math.floor(scroll/8);
+ for(let k=-1;k<=W/8+1;k++){
+  const x=k*8-off,bi=b0+k;
+  rect(x,GY,8,6,grass);rect(x,GY,8,2,grass2);rect(x+(hash(bi)*5|0),GY+2,2,2,grass2);
+  for(let r=0;r<6;r++){const y=GY+6+r*8,h=hash(bi*7+r*13),c=h<.33?[122,82,48]:h<.66?[106,70,40]:[134,92,56];
+   rect(x,y,8,8,`rgb(${c})`);rect(x+(h*5|0),y+(h*40%5|0),2,2,'rgb(90,58,32)');rect(x,y,8,1,'rgba(0,0,0,.12)')}
+ }
+}
+function drawFlowers(){
+ const sp=22,i0=Math.floor(scroll/sp)-1;
+ for(let i=i0;i<i0+W/sp+3;i++){
+  const h=hash(i*3.3);if(h<.45)continue;const x=Math.round(i*sp+h*10-scroll);
+  if(cs.snow>.6){rect(x,GY-3,3,3,'#fff');continue}
+  rect(x+1,GY-5,1,5,'#3f8a2a');const c=['#e63946','#ffd23f','#ff7ac6','#7ab8ff'][i&3];rect(x,GY-8,3,3,c);rect(x+1,GY-7,1,1,'#fff')
+ }
+}
+function drawChar(x,ph,c){
+ const sw=Math.sin(time*7+ph)*3,bob=Math.abs(Math.sin(time*7+ph))*1.2,hy=GY-32-bob;
+ const arm=(dx,col)=>{rect(x+dx,hy+9,4,5,c.shirt);rect(x+dx,hy+14,4,7,col)};
+ g.globalAlpha=1;
+ // back leg + arm
+ rect(x-sw*1.2,GY-12,4,10,'#000a');rect(x-sw*1.2,GY-12,4,10,c.pantsD);rect(x-sw*1.2,GY-2,4,2,'#444');
+ arm(-sw*.9,c.skinD);
+ // front leg
+ rect(x+sw*1.2,GY-12,4,10,c.pants);rect(x+sw*1.2,GY-2,4,2,'#666');
+ // body
+ rect(x,hy+8,4,12,c.shirt);rect(x,hy+18,4,2,c.pants);
+ // head
+ const hx=x-2;rect(hx,hy,8,8,c.skin);
+ rect(hx,hy,8,2,c.hair);rect(hx,hy,3,c.long?13:8,c.hair);rect(hx+3,hy+2,2,1,c.hair);
+ rect(hx+4,hy+3,2,2,'#fff');rect(hx+5,hy+3,1,2,c.eye);rect(hx+5,hy+6,2,1,c.mouth);rect(hx+7,hy+4,1,2,c.skinD);
+ // front arm
+ arm(sw*.9,c.skin);
+}
+const STEVE={skin:'#c68662',skinD:'#a96f4d',hair:'#3b2a1a',shirt:'#00a8a8',pants:'#3a3fa0',pantsD:'#2c3080',eye:'#3a2a8a',mouth:'#7a3a2a'};
+const ALEX={skin:'#e8b48a',skinD:'#c99a74',hair:'#d9742b',shirt:'#6ab04c',pants:'#7a5230',pantsD:'#5e3e22',eye:'#1a7a3a',mouth:'#a04a3a',long:1};
+function drawFx(dt){
+ if(cs.stars>.1){flies.forEach(f=>{const a=cs.stars*(.4+.6*Math.sin(time*2+f.p));if(a<.1)return;g.globalAlpha=a;
+  rect(((f.x-scroll*.9+Math.sin(time+f.p)*8)%W+W)%W,f.y+Math.cos(time*1.3+f.p)*6,2,2,'#d9ff6a');g.globalAlpha=1})}
+ const nr=Math.min(140,Math.floor(cs.rain*90));
+ g.globalAlpha=.65;for(let i=0;i<nr;i++){const d=rain[i];d.y+=(230+d.s*90)*dt*(cs.storm>.5?1.3:1);d.x-=45*dt;if(d.y>H){d.y=-6;d.x=rnd(0,W+40)}if(d.x<-4)d.x+=W+40;
+  rect(d.x,d.y,1,5,cs.stars>.5?'#9db4ff':'#cfe4ff')}
+ g.globalAlpha=1;
+ const ns=Math.floor(cs.snow*120);for(let i=0;i<ns;i++){const d=snow[i];d.y+=(18+d.s*24)*dt;d.x+=Math.sin(time*1.5+i)*12*dt-6*dt;if(d.y>H){d.y=-3;d.x=rnd(0,W)}if(d.x<0)d.x+=W;rect(d.x,d.y,d.s>.6?2:1,d.s>.6?2:1,'#fff')}
+}
+function frame(now){
+ const dt=Math.min(.05,(now-(frame.l||now))/1000);frame.l=now;time+=dt;scroll+=32*dt;updWx(dt);
+ if(noiseGain)noiseGain.gain.value=muted?0:clamp(cs.rain,0,1.6)*.05;
+ drawSky();drawHills();drawTrees(.6,58,0);drawGround();drawTrees(1,170,1);drawFlowers();
+ drawChar(105,0,STEVE);drawChar(150,1.6,ALEX);
+ drawFx(dt);
+ if(cs.dark>.01){g.fillStyle=`rgba(4,6,30,${cs.dark})`;g.fillRect(0,0,W,H)}
+ if(wk==='storm'&&cs.storm>.6){ltimer-=dt;if(ltimer<0){flash=1;ltimer=rnd(3,8);boltX=rnd(30,290);setTimeout(thunder,rnd(250,700))}}
+ if(flash>0){if(flash>.55){let x=boltX;for(let y=0;y<GY-10;y+=10){x+=rnd(-6,6);rect(x,y,3,12,'#fff')}}
+  g.fillStyle=`rgba(255,255,255,${flash*.55})`;g.fillRect(0,0,W,H);flash-=dt*2.8}
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- Music / weather switching ---------- */
+let started=false,toastT;
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),2600)}
+function setTrack(i,quiet){
+ curT=i;const T=TR[i];wk=T.w;mi=Math.floor(T.sc.length/2);
+ $('np').textContent='♪ '+T.n+' '+T.ic;if(!quiet)toast(T.ic+' '+T.n)
+}
+$('surp').onclick=()=>{
+ initAudio();let i;do{i=Math.floor(Math.random()*TR.length)}while(i===curT);
+ setTrack(i,true);toast('🎲 Surprise! '+TR[i].ic+' '+TR[i].n);chime();
+};
+$('mute').onclick=()=>{initAudio();muted=!muted;master.gain.value=muted?0:.7;$('mute').textContent=muted?'🔇':'🔊'};
+setInterval(()=>{if(started)setTrack((curT+1)%TR.length)},50000);
+setTrack(0,true);
+
+/* ---------- Dialogue + quiz ---------- */
+const bubS=$('bS'),bubA=$('bA'),panel=$('panel');
+const CH={
+sunny:["What a beautiful day for a walk!","Look at all those flowers!","I love the sunshine.","Do you hear the birds?"],
+rain:["I love the smell of rain on grass.","Good thing puddles are fun.","Listen to the raindrops..."],
+snow:["Snowflakes everywhere!","So peaceful out here in the snow.","Brr, but it looks magical!"],
+night:["The stars look amazing tonight.","Watch out for creepers!","Look, fireflies!"],
+storm:["Whoa, that thunder was loud!","Stay close, this is a big storm!","Lightning is cool and scary."]
+};
+const LEAD=["Quiz time!","Bet you can't get this one...","Okay brainiac, try this!","Here comes a tough one!","Let's test your brain!"];
+const GOOD=["Awesome!","Nailed it!","Big brain!","Epic answer!"],BAD=["Oof, not quite!","So close!","Ouch, lost a heart!","Next one is yours!"];
+const say=(el,who,txt,ms)=>{el.innerHTML='<b>'+who+'</b>';el.appendChild(document.createTextNode(txt));el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),ms)};
+const sS=(t,ms=3500)=>say(bubS,'Steve',t,ms),sA=(t,ms=3500)=>say(bubA,'Alex',t,ms);
+let qs,qi,hearts,score,streak,state,tm;
+function hud(){$('hearts').innerHTML='♥'.repeat(hearts)+'<i>'+'♥'.repeat(5-hearts)+'</i>';$('score').textContent='XP '+score+(streak>1?'  🔥'+streak:'')}
+function startGame(){
+ qs=shuffle(Q.slice()).slice(0,25);qi=0;hearts=5;score=0;streak=0;hud();$('ov').hidden=true;walk();
+}
+function walk(){
+ state='walk';panel.innerHTML='<div class="hint">Steve and Alex are chatting while they walk... a question is coming!</div>';
+ const lines=shuffle(CH[wk].slice());
+ (Math.random()<.5?sS:sA)(lines[0],3000);
+ setTimeout(()=>{if(state==='walk')(Math.random()<.5?sA:sS)(pick(CH[wk]),2800)},2800);
+ clearTimeout(tm);tm=setTimeout(ask,5600);
+}
+function ask(){
+ state='ask';const q=qs[qi],asker=qi%2?'Alex':'Steve';
+ (asker==='Steve'?sS:sA)(pick(LEAD),2600);
+ const opts=shuffle(q[1].map((t,i)=>({t,c:i===q[2]})));
+ panel.innerHTML='';
+ const nm=document.createElement('div');nm.className='nm';nm.textContent=asker+' asks · Question '+(qi+1)+' of '+qs.length;
+ const qq=document.createElement('div');qq.className='q';qq.textContent=q[0];
+ const og=document.createElement('div');og.className='opts';
+ opts.forEach((o,i)=>{const b=document.createElement('button');b.className='btn';b.textContent='ABCD'[i]+') '+o.t;b.onclick=()=>answer(b,o.c,og,opts,asker);b._c=o.c;og.appendChild(b)});
+ panel.append(nm,qq,og);
+}
+function answer(btn,ok,og,opts,asker){
+ if(state!=='ask')return;state='fb';
+ [...og.children].forEach(b=>{b.disabled=true;if(b._c)b.classList.add('ok')});
+ const q=qs[qi],askS=asker==='Steve'?sS:sA,othS=asker==='Steve'?sA:sS;
+ if(ok){score+=10+Math.min(streak,5)*2;streak++;askS(pick(GOOD),3500)}
+ else{btn.classList.add('no');hearts--;streak=0;askS(pick(BAD),3500)}
+ othS('Fun fact: '+q[3],5200);hud();
+ const f=document.createElement('div');f.className='fact';
+ const t=document.createElement('span');t.textContent=(ok?'✔ Correct! ':'✘ Not quite. ')+q[3];
+ const nb=document.createElement('button');nb.className='btn surp';
+ const last=qi>=qs.length-1;
+ nb.textContent=hearts<=0?'CONTINUE ▶':last?'FINISH ▶':'NEXT QUESTION ▶';
+ nb.onclick=()=>{qi++;if(hearts<=0||last)end(hearts>0);else walk()};
+ f.append(t,nb);panel.appendChild(f);nb.focus();
+}
+function end(win){
+ state='end';const ov=$('ov');ov.hidden=false;
+ ov.innerHTML='<h2>'+(win?'YOU WIN!':'GAME OVER')+'</h2><p>'+(win?'You answered every question and kept your hearts. ':'You ran out of hearts. ')+'Final score: '+score+' XP.</p><button class="btn" id="again">▶ PLAY AGAIN</button>';
+ $('again').onclick=startGame;
+}
+$('start').onclick=()=>{initAudio();started=true;setTrack(0);startGame()};
+})();
+</script>
+</body>
+</html>
